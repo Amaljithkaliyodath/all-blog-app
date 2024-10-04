@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    
+    <!-- Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script>
+        // Add Tailwind config for theme extension
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f9a8d4',
+                            400: '#f472b6',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                            800: '#9d174d',
+                            900: '#831843',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+
+    <script>
+        // Toggle profile dropdown
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById("profile-dropdown");
+            dropdown.classList.toggle("hidden");
+        }
+
+        // Toggle mobile navbar
+        function toggleNavbar() {
+            const nav = document.getElementById("mobile-nav");
+            nav.classList.toggle("hidden");
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-blue-600">My Blog</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="{% url 'index' %}" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="{% url 'my_blog' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">My Blog</a>
+                        <a href="{% url 'create_blog' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">New Blog</a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <div class="relative">
+                        <button class="focus:outline-none" onclick="toggleProfileDropdown()">
+                            {% if request.user.profile_picture %}
+                                <!-- Display profile image if available -->
+                                <img src="{{ request.user.profile_picture.url }}" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md">
+                            {% else %}
+                                <!-- Default Font Awesome user icon with smaller size (40x40) -->
+                                <i class="fas fa-user-circle text-gray-600" style="font-size: 40px;"></i>
+                            {% endif %}
+                        </button>
+                        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 bg-white text-gray-700 rounded-lg shadow-lg py-2 w-48">
+                            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                            <form method="POST" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="block px-4 py-2 hover:bg-gray-100">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="sm:hidden flex items-center">
+                    <button onclick="toggleNavbar()" class="focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobile-nav" class="hidden sm:hidden bg-blue-600 text-white">
+            <a href="{% url 'index' %}" class="block px-4 py-2 hover:bg-blue-500">Home</a>
+            <a href="{% url 'my_blog' %}" class="block px-4 py-2 hover:bg-blue-500">My Blog</a>
+            <a href="{% url 'create_blog' %}" class="block px-4 py-2 hover:bg-blue-500">New Blog</a>
+            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-blue-500">Profile</a>
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="block px-4 py-2 hover:bg-blue-500">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Profile Section -->
+    <div class="container mx-auto px-4 py-10 max-w-3xl w-full">
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-primary-600 to-secondary-600 p-6 text-center">
+                <h2 class="text-3xl font-bold text-white">Update Your Profile</h2>
+            </div>
+            <div class="p-6">
+                <form method="POST" enctype="multipart/form-data" class="space-y-6" id="profileForm">
+                    {% csrf_token %}
+                    <div class="flex flex-col items-center sm:flex-row sm:items-start sm:space-x-8">
+                        <!-- Profile Picture Section -->
+                        <div class="w-24 h-24 rounded-full object-cover border-2 border-white shadow-md flex items-center justify-center">
+                            {% if user.profile_picture %}
+                                <img id="profilePreview" src="{{ user.profile_picture.url }}" alt="Profile Picture" class="w-24 h-24 rounded-full object-cover border-2 border-white shadow-md">
+                            {% else %}
+                                <!-- Default Font Awesome user icon if no profile picture is available -->
+                                <i class="fas fa-user-circle text-gray-600" style="font-size: 100px;"></i>
+                            {% endif %}
+                        </div>
+                        <div class="mt-4 sm:mt-0">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Change Profile Picture</label>
+                            <input type="file" id="profilePicture" name="profile_picture" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                        </div>
+                    </div>
+
+                    <!-- Username and Email Section -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                            <input type="text" id="id_username" name="username" value="{{ form.username.value }}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required>
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="id_email" name="email" value="{{ form.email.value }}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500" required>
+                        </div>
+                    </div>
+
+                    <!-- Bio Section -->
+                    <div>
+                        <label for="bio" class="block text-sm font-medium text-gray-700">Bio</label>
+                        <textarea id="bio" name="bio" rows="4" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">{{ form.bio.value }}</textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center mt-6">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script for JavaScript Validation -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector("#profileForm");
+            const usernameInput = document.querySelector("#id_username");
+            const emailInput = document.querySelector("#id_email");
+            const profilePictureInput = document.querySelector("#profilePicture");
+            const profilePreview = document.getElementById("profilePreview");
+
+            form.addEventListener("submit", function (e) {
+                let valid = true;
+                const emailPattern = /^[^@]+@[^@]+\.[^@]+$/;
+
+                if (usernameInput.value.trim() === "") {
+                    alert("Username is required.");
+                    valid = false;
+                }
+                if (!emailPattern.test(emailInput.value)) {
+                    alert("Please enter a valid email address.");
+                    valid = false;
+                }
+                if (!valid) e.preventDefault();
+            });
+
+            profilePictureInput.addEventListener("change", function () {
+                const file = profilePictureInput.files[0];
+                if (file && !file.type.startsWith('image/')) {
+                    alert("Please upload a valid image file.");
+                    profilePictureInput.value = '';
+                } else if (file) {
+                    const reader = new FileReader();
+                    reader.onload = e => profilePreview.src = e.target.result;
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

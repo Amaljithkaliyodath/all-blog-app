@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | Blog Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between">
+                <div class="flex space-x-4">
+                    <!-- Logo -->
+                    <a href="{% url 'home' %}" class="flex items-center py-5 px-2 text-gray-700">
+                        <svg class="h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.1-.9-2-2-2H7V4h10v5h-3c-1.1 0-2 .9-2 2v9h6V4H6v7h6v9z" />
+                        </svg>
+                        <span class="font-bold text-lg">BlogApp</span>
+                    </a>
+                </div>
+
+                <!-- Menu -->
+                <div class="flex items-center space-x-1">
+                    <a href="{% url 'home' %}" class="py-5 px-3 text-gray-700 hover:text-blue-500">Home</a>
+
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile' %}" class="py-5 px-3 text-gray-700 hover:text-blue-500">Profile</a>
+                        <a href="{% url 'logout' %}" class="py-5 px-3 text-gray-700 hover:text-red-500">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="py-5 px-3 text-gray-700 hover:text-blue-500">Login</a>
+                        <a href="{% url 'signup' %}" class="py-5 px-3 text-gray-700 hover:text-blue-500">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Section -->
+    <section class="bg-gray-100 text-gray-700">
+        <div class="max-w-7xl mx-auto p-5">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">Welcome to BlogApp</h1>
+                <p class="text-lg">A place to share your thoughts, ideas, and stories.</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* Tailwind CSS styling */
+        .blog-title {
+            color: #1a202c;
+            font-weight: 600;
+        }
+        .blog-content {
+            color: #4a5568;
+        }
+        .blog-author {
+            color: #2b6cb0;
+        }
+        .card-bg {
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+        .card-bg:hover {
+            border-color: #2b6cb0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animation SVG styling */
+        svg {
+            width: 90%;
+            height: auto;
+            position: relative;
+            z-index: 1;
+        }
+        .path {
+            fill: none;
+            stroke: white;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-dasharray: 800;
+            stroke-dashoffset: 800;
+            animation: draw 6s ease forwards infinite;
+        }
+
+        @keyframes draw {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .subtext {
+            font-size: 1.2em;
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+        }
+
+        /* Glass effect for SVG section */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+        }
+
+        /* Full-width Hero Section with blue background */
+        .hero-bg {
+            background-color: #1a73e8;
+            padding: 60px 0;
+            border-radius: 0;
+            width: 100%;
+            position: relative;
+            z-index: 0;
+        }
+
+        /* To resolve the dropdown menu going behind the SVG */
+        #profile-dropdown {
+            position: absolute;
+            z-index: 50;
+        }
+
+        /* Typing animation */
+        .typing-animation {
+            font-size: 3em;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.8);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 4px solid white;
+            width: 25ch; /* Length of the sentence */
+            animation: typing 4s steps(25, end) infinite, blink 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            0% { width: 0; }
+            50% { width: 25ch; } /* Full sentence is displayed */
+            100% { width: 0; } /* Erase the sentence */
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+    </style>
+
+    <script>
+        function fetchBlogs(page = 1) {
+            const blogsContainer = document.getElementById('blogs-container');
+            const paginationContainer = document.getElementById('pagination-controls');
+            const statusMessage = document.getElementById('status-message');
+            
+            blogsContainer.innerHTML = ''; 
+            statusMessage.textContent = 'Loading blogs...';
+
+            fetch(`/api/all-blog-posts/?page=${page}`)
+                .then(response => response.json())
+                .then(data => {
+                    blogsContainer.innerHTML = '';
+
+                    if (data.results.length === 0) {
+                        statusMessage.textContent = 'No blogs found.';
+                    } else {
+                        data.results.forEach(blog => {
+                            blogsContainer.innerHTML += `
+                                <div class="card-bg shadow-lg rounded-lg p-6 hover:bg-white transition duration-300 ease-in-out">
+                                    <h2 class="blog-title text-2xl mb-2">${blog.title}</h2>
+                                    <p class="blog-content text-base mb-4">${blog.content.substring(0, 100)}...</p>
+                                    <div class="blog-author text-sm font-medium mb-4">
+                                        By: ${blog.author} | Created on: ${new Date(blog.created_at).toLocaleDateString()}
+                                    </div>
+                                    <a href="/view-blog/${blog.custom_id}" class="text-blue-600 hover:text-blue-800 font-semibold">Read More</a>
+                                </div>
+                            `;
+                        });
+
+                        paginationContainer.innerHTML = '';
+                        paginationContainer.innerHTML += `<span class="text-sm text-gray-600">Page ${data.current_page} of ${data.total_pages}</span>`;
+
+                        if (data.previous) {
+                            paginationContainer.innerHTML += `<a href="#" class="px-4 py-2 text-blue-600 hover:text-blue-800" onclick="fetchBlogs(${data.current_page - 1})">Previous</a>`;
+                        }
+
+                        if (data.next) {
+                            paginationContainer.innerHTML += `<a href="#" class="px-4 py-2 text-blue-600 hover:text-blue-800" onclick="fetchBlogs(${data.current_page + 1})">Next</a>`;
+                        }
+
+                        statusMessage.textContent = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusMessage.textContent = 'Failed to load blogs. Please try again later.';
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchBlogs();
+        });
+
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById("profile-dropdown");
+            dropdown.classList.toggle("hidden");
+        }
+
+        function toggleNavbar() {
+            const nav = document.getElementById("mobile-nav");
+            nav.classList.toggle("hidden");
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-blue-600">My Blog</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="{% url 'index' %}" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="{% url 'my_blog' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">My Blog</a>
+                        <a href="{% url 'create_blog' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">New Blog</a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <div class="relative">
+                        <button class="focus:outline-none" onclick="toggleProfileDropdown()">
+                            {% if request.user.profile_picture %}
+                                <!-- Display profile image if available -->
+                                <img src="{{ request.user.profile_picture.url }}" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md">
+                            {% else %}
+                                <!-- Default Font Awesome user icon with smaller size (40x40) -->
+                                <i class="fas fa-user-circle text-gray-600" style="font-size: 40px;"></i>
+                            {% endif %}
+                        </button>
+                        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 bg-white text-gray-700 rounded-lg shadow-lg py-2 w-48">
+                            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                            <form method="POST" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="block px-4 py-2 hover:bg-gray-100">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="sm:hidden flex items-center">
+                    <button onclick="toggleNavbar()" class="focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobile-nav" class="hidden sm:hidden bg-blue-600 text-white">
+            <a href="{% url 'index' %}" class="block px-4 py-2 hover:bg-blue-500">Home</a>
+            <a href="{% url 'my_blog' %}" class="block px-4 py-2 hover:bg-blue-500">My Blog</a>
+            <a href="{% url 'create_blog' %}" class="block px-4 py-2 hover:bg-blue-500">New Blog</a>
+            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-blue-500">Profile</a>
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="block px-4 py-2 hover:bg-blue-500">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Full Hero Section with SVG and glass effect -->
+    <div class="hero-bg glass-effect relative">
+        <!-- Typing animation text -->
+        <div class="typing-animation">Welcome to Awesome Blog</div>
+        <svg viewBox="0 0 800 200">
+            <path class="path" d="M50 100 C 100 0, 200 200, 250 100 S 400 200, 450 100" />
+            <path class="path" d="M470 100 Q 490 20, 510 100 Q 530 180, 550 100" />
+            <path class="path" d="M570 100 Q 600 20, 620 100 T 650 100" />
+            <path class="path" d="M670 100 C 690 20, 750 180, 770 100" />
+        </svg>
+        <div class="subtext">
+            Sharing stories, insights, and more.
+        </div>
+
+        <!-- Centered Blog Creation Button -->
+        <div class="flex justify-center mt-6">
+            <a href="{% url 'create_blog' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+                + Create New Blog
+            </a>
+        </div>
+    </div>
+
+    <!-- Blog Cards Section -->
+    <main class="container mx-auto mt-10 px-4">
+        <div id="blogs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Blogs will be loaded here dynamically -->
+        </div>
+        <div id="pagination-controls" class="flex justify-center mt-8"></div>
+        <p id="status-message" class="text-center mt-4 text-red-500"></p>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6 mt-10">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 My Blog. All rights reserved.</p>
+            <div class="mt-4">
+                <a href="#" class="text-gray-400 hover:text-white mx-2">Facebook</a>
+                <a href="#" class="text-gray-400 hover:text-white mx-2">Twitter</a>
+                <a href="#" class="text-gray-400 hover:text-white mx-2">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!-- blog/templates/blog/signup.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link href="{% static 'tailwind.css' %}" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md">
+            <h2 class="text-center text-2xl font-bold mb-6">Sign Up</h2>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}  <!-- Django form rendering -->
+                <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700">Sign Up</button>
+            </form>
+            <p class="text-center mt-4">Already have an account? <a href="{% url 'login' %}" class="text-blue-500">Log In</a></p>
+        </div>
+    </div>
+</body>
+</html>

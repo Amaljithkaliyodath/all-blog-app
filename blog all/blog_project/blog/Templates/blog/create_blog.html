@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if blog %}Edit Blog{% else %}Create Blog{% endif %}</title>
+    
+    <!-- Use the Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome for toolbar icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9',
+                    }
+                }
+            }
+        }
+
+        // Navbar functions for toggling profile and mobile menu
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById("profile-dropdown");
+            dropdown.classList.toggle("hidden");
+        }
+
+        function toggleNavbar() {
+            const nav = document.getElementById("mobile-nav");
+            nav.classList.toggle("hidden");
+        }
+    </script>
+
+    <style>
+        /* Custom modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-blue-600">My Blog</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <!-- Home link updated to point to index.html -->
+                        <a href="{% url 'index' %}" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+    
+                        <a href="{% url 'my_blog' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">My Blog</a>
+    
+                        <!-- About link updated to point to create_blog URL -->
+                        <a href="{% url 'create_blog' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">New Blog</a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <div class="relative">
+                        <button class="focus:outline-none" onclick="toggleProfileDropdown()">
+                            {% if request.user.profile_picture %}
+                                <!-- Display profile image if available -->
+                                <img src="{{ request.user.profile_picture.url }}" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md">
+                            {% else %}
+                                <!-- Default Font Awesome user icon with smaller size (40x40) -->
+                                <i class="fas fa-user-circle text-gray-600" style="font-size: 40px;"></i>
+                            {% endif %}
+                        </button>
+                        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 bg-white text-gray-700 rounded-lg shadow-lg py-2 w-48">
+                            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                            <form method="POST" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="block px-4 py-2 hover:bg-gray-100">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="sm:hidden flex items-center">
+                    <button onclick="toggleNavbar()" class="focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Navigation -->
+        <div id="mobile-nav" class="hidden sm:hidden bg-blue-600 text-white">
+            <!-- Home link for mobile updated -->
+            <a href="{% url 'index' %}" class="block px-4 py-2 hover:bg-blue-500">Home</a>
+            <a href="{% url 'my_blog' %}" class="block px-4 py-2 hover:bg-blue-500">My Blog</a>
+            <!-- About link for mobile updated -->
+            <a href="{% url 'create_blog' %}" class="block px-4 py-2 hover:bg-blue-500">New Blog</a>
+            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-blue-500">Profile</a>
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="block px-4 py-2 hover:bg-blue-500">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-300 p-4 flex justify-between items-center shadow-md mt-4">
+        <div class="flex items-center space-x-4">
+            <div class="logo w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">B</div>
+            <h1 class="text-xl font-bold">{% if blog %}Edit Blog{% else %}Create a New Blog{% endif %}</h1>
+        </div>
+        <div class="flex space-x-2">
+            <button id="preview-btn" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-200">Preview</button>
+            <button id="save-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">{% if blog %}Update Post{% else %}Save Post{% endif %}</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-6 mt-6 space-y-6">
+        <form id="blog-form">
+            <input type="text" name="title" id="post-title" placeholder="Enter your blog title..." class="w-full p-4 text-2xl font-semibold border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500" value="{% if blog %}{{ blog.title }}{% endif %}">
+            
+            <!-- Tags Input -->
+            <input type="text" name="tags" id="post-tags" placeholder="Enter tags (comma-separated)" class="w-full p-4 mt-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500" value="{% if blog %}{{ blog.tags }}{% endif %}">
+
+            <div class="editor-container bg-white border border-gray-300 rounded-md shadow-sm mt-6">
+                <!-- Toolbar for text formatting -->
+                <div class="toolbar p-4 border-b border-gray-300 flex space-x-4">
+                    <!-- Bold, Italic, Underline -->
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="bold"><i class="fas fa-bold"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="italic"><i class="fas fa-italic"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="underline"><i class="fas fa-underline"></i></button>
+
+                    <!-- Text Alignment -->
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="justifyLeft"><i class="fas fa-align-left"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="justifyCenter"><i class="fas fa-align-center"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="justifyRight"><i class="fas fa-align-right"></i></button>
+
+                    <!-- Insert Image, Link -->
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" id="insert-image-btn"><i class="fas fa-image"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" id="insert-link-btn"><i class="fas fa-link"></i></button>
+                </div>
+                <div contenteditable="true" id="post-content" class="w-full h-64 p-4 focus:outline-none border-0 resize-none focus:ring-0">
+                    {% if blog %}
+                        {{ blog.content|safe }}
+                    {% endif %}
+                </div>
+                <textarea name="content" id="post-content-textarea" class="hidden"></textarea>
+            </div>
+        </form>
+
+        <!-- Preview Section -->
+        <div id="preview-section" class="hidden bg-white border border-gray-300 rounded-md shadow-sm p-4">
+            <h2 class="text-xl font-bold" id="preview-title"></h2>
+            <div id="preview-content"></div>
+        </div>
+
+        <p id="status-message"></p>
+    </main>
+
+    <!-- Insert Image Modal -->
+    <div id="image-modal" class="modal">
+        <div class="modal-content">
+            <label for="image-url">Enter the image URL:</label>
+            <input type="text" id="image-url" class="border p-2 w-full rounded-md">
+            <button id="insert-image" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded">Insert Image</button>
+            <button id="close-image-modal" class="mt-2 px-4 py-2 bg-gray-500 text-white rounded">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Insert Link Modal -->
+    <div id="link-modal" class="modal">
+        <div class="modal-content">
+            <label for="link-url">Enter the link URL:</label>
+            <input type="text" id="link-url" class="border p-2 w-full rounded-md">
+            <button id="insert-link" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded">Insert Link</button>
+            <button id="close-link-modal" class="mt-2 px-4 py-2 bg-gray-500 text-white rounded">Cancel</button>
+        </div>
+    </div>
+
+    <!-- JavaScript for the editor -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const saveBtn = document.getElementById('save-btn');
+            const previewBtn = document.getElementById('preview-btn');
+            const postContent = document.getElementById('post-content');
+            const postContentTextarea = document.getElementById('post-content-textarea');
+            const statusMessage = document.getElementById('status-message');
+            const previewSection = document.getElementById('preview-section');
+            const previewTitle = document.getElementById('preview-title');
+            const previewContent = document.getElementById('preview-content');
+
+            const imageModal = document.getElementById('image-modal');
+            const linkModal = document.getElementById('link-modal');
+            const imageInput = document.getElementById('image-url');
+            const linkInput = document.getElementById('link-url');
+
+            const isEditing = {% if blog %} true {% else %} false {% endif %};
+            const customId = {% if blog %} '{{ blog.custom_id }}' {% else %} null {% endif %};
+
+            // Save button functionality
+            saveBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const title = document.getElementById('post-title').value;
+                const tags = document.getElementById('post-tags').value;
+                const content = postContent.innerHTML;
+                postContentTextarea.value = content;
+
+                const method = isEditing ? 'PUT' : 'POST';
+                const apiUrl = isEditing ? `/api/update-blog/${customId}/` : '/api/create-blog/';
+
+                fetch(apiUrl, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        tags: tags,
+                        content: content
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error saving blog post.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    statusMessage.textContent = isEditing ? 'Blog post updated successfully!' : 'Blog post created successfully!';
+                    statusMessage.style.color = 'green';
+                    setTimeout(() => {
+                        window.location.href = '/my-blog/';
+                    }, 2000);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusMessage.textContent = 'Failed to save blog post. Please try again.';
+                    statusMessage.style.color = 'red';
+                });
+            });
+
+            // Toolbar functionality for formatting
+            const toolbarButtons = document.querySelectorAll('.toolbar button');
+            toolbarButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const command = this.getAttribute('data-command');
+                    document.execCommand(command, false, null);
+                    postContent.focus();
+                });
+            });
+
+            // Preview button functionality
+            previewBtn.addEventListener('click', function () {
+                const title = document.getElementById('post-title').value;
+                const content = postContent.innerHTML;
+                const tags = document.getElementById('post-tags').value;
+
+                previewTitle.textContent = title;
+                previewContent.innerHTML = `<strong>Tags:</strong> ${tags}<br><br>${content}`;
+                previewSection.classList.toggle('hidden');
+            });
+
+            // Insert Image Modal
+            const insertImageBtn = document.getElementById('insert-image-btn');
+            const insertImage = document.getElementById('insert-image');
+            const closeImageModal = document.getElementById('close-image-modal');
+
+            insertImageBtn.addEventListener('click', () => {
+                imageModal.style.display = 'flex';
+            });
+
+            closeImageModal.addEventListener('click', () => {
+                imageModal.style.display = 'none';
+            });
+
+            insertImage.addEventListener('click', () => {
+                const imageUrl = imageInput.value;
+                if (imageUrl) {
+                    document.execCommand('insertImage', false, imageUrl);
+                }
+                imageModal.style.display = 'none';
+            });
+
+            // Insert Link Modal
+            const insertLinkBtn = document.getElementById('insert-link-btn');
+            const insertLink = document.getElementById('insert-link');
+            const closeLinkModal = document.getElementById('close-link-modal');
+
+            insertLinkBtn.addEventListener('click', () => {
+                linkModal.style.display = 'flex';
+            });
+
+            closeLinkModal.addEventListener('click', () => {
+                linkModal.style.display = 'none';
+            });
+
+            insertLink.addEventListener('click', () => {
+                const linkUrl = linkInput.value;
+                if (linkUrl) {
+                    document.execCommand('createLink', false, linkUrl);
+                }
+                linkModal.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

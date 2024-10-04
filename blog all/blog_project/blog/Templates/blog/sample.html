@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Text Animation</title>
+    <style>
+        body {
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        svg {
+            width: 90%;
+            height: auto;
+        }
+
+        .path {
+            fill: none;
+            stroke: black;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-dasharray: 800;
+            stroke-dashoffset: 800;
+            animation: draw 6s ease forwards;
+        }
+
+        @keyframes draw {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        /* Style for the additional paragraph */
+        .subtext {
+            font-size: 1.2em;
+            text-align: center;
+            margin-top: 20px;
+            color: #4a4a4a;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div>
+        <svg viewBox="0 0 800 200">
+            <!-- 'Welcome' Path -->
+            <path class="path" d="M50 100 C 100 0, 200 200, 250 100 S 400 200, 450 100" />
+            
+            <!-- 'to' Path -->
+            <path class="path" d="M470 100 Q 490 20, 510 100 Q 530 180, 550 100" />
+            
+            <!-- 'My' Path -->
+            <path class="path" d="M570 100 Q 600 20, 620 100 T 650 100" />
+            
+            <!-- 'Awesome' Path -->
+            <path class="path" d="M670 100 C 690 20, 750 180, 770 100" />
+        </svg>
+
+        <div class="subtext">
+            Sharing stories, insights, and more.
+        </div>
+    </div>
+
+</body>
+</html>

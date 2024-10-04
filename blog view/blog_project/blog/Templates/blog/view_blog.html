@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Blog</title>
+    <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mx-auto">
+        <h1 class="text-2xl font-bold">View Blog</h1>
+        <div id="blog-container" class="mt-8">
+            <!-- Blog post will be inserted here -->
+        </div>
+        <p id="status-message"></p> <!-- For showing success or error messages -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const blogContainer = document.getElementById('blog-container');
+            const statusMessage = document.getElementById('status-message');
+            const customId = '{{ custom_id }}';
+            const apiUrl = `/api/view-blog/${customId}/`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error fetching blog data.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    blogContainer.innerHTML = `
+                        <div class="p-4 mb-4 bg-gray-100 rounded-md">
+                            <h2 class="text-xl font-semibold">${data.title}</h2>
+                            <p><strong>Unique ID:</strong> ${data.custom_id}</p>
+                            <p>${new Date(data.created_at).toLocaleString()}</p>
+                            <div>${data.content}</div>
+                        </div>
+                    `;
+
+                    statusMessage.style.color = 'green';
+                    statusMessage.textContent = 'Blog loaded successfully.';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusMessage.textContent = 'Failed to load blog. Please try again later.';
+                    statusMessage.style.color = 'red';
+                });
+        });
+    </script>
+</body>
+
+</html>

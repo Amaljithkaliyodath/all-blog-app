@@ -1,0 +1,18 @@
+<!-- my_blog.html -->
+<div class="container mx-auto">
+    <div class="flex justify-between items-center py-4">
+        <h1 class="text-2xl font-bold">My Blog</h1>
+        <a href="{% url 'create_blog' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+            + Create New Blog
+        </a>
+    </div>
+    <div class="mt-8">
+        {% for blog in blogs %}
+            <div class="p-4 mb-4 bg-gray-100 rounded-md">
+                <a href="{% url 'view_blog' blog.id %}" class="text-xl font-semibold">{{ blog.title }}</a>
+            </div>
+        {% endfor %}
+        <!-- Pagination links -->
+        {{ blogs.paginator.num_pages }}
+    </div>
+</div>

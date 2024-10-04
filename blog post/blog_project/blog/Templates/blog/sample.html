@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Blog</title>
+    {% load static %}
+    <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-300 p-4 flex justify-between items-center shadow-md">
+        <div class="flex items-center space-x-4">
+            <div class="logo w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">B</div>
+            <h1 class="text-xl font-bold">Create a New Blog</h1>
+        </div>
+        <div class="flex space-x-2">
+            <button id="preview-btn" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-200">Preview</button>
+            <button form="blog-form" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Save Post</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-6 mt-6 space-y-6">
+        <form method="post" id="blog-form">
+            {% csrf_token %}
+            <input type="text" name="title" id="post-title" placeholder="Enter your blog title..." class="w-full p-4 text-2xl font-semibold border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500">
+
+            <div class="editor-container bg-white border border-gray-300 rounded-md shadow-sm mt-6">
+                <div class="toolbar p-4 border-b border-gray-300 flex space-x-4">
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="bold"><i class="fas fa-bold"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="italic"><i class="fas fa-italic"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="underline"><i class="fas fa-underline"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="insertOrderedList"><i class="fas fa-list-ol"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="insertUnorderedList"><i class="fas fa-list-ul"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="justifyLeft"><i class="fas fa-align-left"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="justifyCenter"><i class="fas fa-align-center"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="justifyRight"><i class="fas fa-align-right"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="insertImage"><i class="fas fa-image"></i></button>
+                    <button type="button" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-200" data-command="createLink"><i class="fas fa-link"></i></button>
+                </div>
+                <div contenteditable="true" id="post-content" class="w-full h-64 p-4 focus:outline-none border-0 resize-none focus:ring-0"></div>
+                <textarea name="content" id="post-content-textarea" class="hidden"></textarea>
+            </div>
+        </form>
+
+        <div id="preview-section" class="hidden bg-white border border-gray-300 rounded-md shadow-sm p-4">
+            <h2 class="text-xl font-bold" id="preview-title"></h2>
+            <div id="preview-content"></div>
+        </div>
+    </main>
+
+    <!-- JavaScript for Text Formatting and Preview -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toolbarButtons = document.querySelectorAll('.toolbar button');
+            const postContent = document.getElementById('post-content');
+            const previewBtn = document.getElementById('preview-btn');
+            const previewSection = document.getElementById('preview-section');
+            const previewTitle = document.getElementById('preview-title');
+            const previewContent = document.getElementById('preview-content');
+            const postContentTextarea = document.getElementById('post-content-textarea');
+
+            // Toolbar functionality for formatting
+            toolbarButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const command = this.getAttribute('data-command');
+
+                    if (command === 'insertImage') {
+                        const url = prompt('Enter the image URL');
+                        if (url) {
+                            document.execCommand('insertImage', false, url);
+                        }
+                    } else if (command === 'createLink') {
+                        const url = prompt('Enter the URL');
+                        if (url) {
+                            document.execCommand('createLink', false, url);
+                        }
+                    } else {
+                        document.execCommand(command, false, null);
+                    }
+
+                    postContent.focus();
+                });
+            });
+
+            // Preview button functionality
+            previewBtn.addEventListener('click', function () {
+                const title = document.getElementById('post-title').value;
+                const content = postContent.innerHTML;
+
+                previewTitle.textContent = title;
+                previewContent.innerHTML = content;
+
+                previewSection.classList.toggle('hidden');
+            });
+
+            // Before submitting the form, copy the editor content to the hidden textarea
+            document.getElementById('blog-form').addEventListener('submit', function (e) {
+                postContentTextarea.value = postContent.innerHTML;
+            });
+        });
+    </script>
+</body>
+
+</html>

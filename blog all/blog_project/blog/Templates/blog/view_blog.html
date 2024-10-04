@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Blog</title>
+    
+    <!-- Use Tailwind CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+     <style>
+        @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 2s ease-in-out;
+    }
+     </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9',
+                    }
+                }
+            }
+        }
+
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById("profile-dropdown");
+            dropdown.classList.toggle("hidden");
+        }
+
+        function toggleNavbar() {
+            const nav = document.getElementById("mobile-nav");
+            nav.classList.toggle("hidden");
+        }
+    </script>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-blue-600">My Blog</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="{% url 'index' %}" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="{% url 'my_blog' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">My Blog</a>
+                        <a href="{% url 'create_blog' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">New Blog</a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <div class="relative">
+                        <button class="focus:outline-none" onclick="toggleProfileDropdown()">
+                            {% if request.user.profile_picture %}
+                                <!-- Display profile image if available -->
+                                <img src="{{ request.user.profile_picture.url }}" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md">
+                            {% else %}
+                                <!-- Default Font Awesome user icon with smaller size (40x40) -->
+                                <i class="fas fa-user-circle text-gray-600" style="font-size: 40px;"></i>
+                            {% endif %}
+                        </button>
+                        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 bg-white text-gray-700 rounded-lg shadow-lg py-2 w-48">
+                            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                            <form method="POST" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="block px-4 py-2 hover:bg-gray-100">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="sm:hidden flex items-center">
+                    <button onclick="toggleNavbar()" class="focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobile-nav" class="hidden sm:hidden bg-blue-600 text-white">
+            <a href="{% url 'index' %}" class="block px-4 py-2 hover:bg-blue-500">Home</a>
+            <a href="{% url 'my_blog' %}" class="block px-4 py-2 hover:bg-blue-500">My Blog</a>
+            <a href="{% url 'create_blog' %}" class="block px-4 py-2 hover:bg-blue-500">New Blog</a>
+            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-blue-500">Profile</a>
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="block px-4 py-2 hover:bg-blue-500">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+<!-- Blog View Section -->
+<div class="container mx-auto mt-10 px-4 sm:px-6 lg:px-8">
+    <!-- Animated Header with Blue Color -->
+    <h1 class="text-2xl font-bold text-blue-500 animate-bounce">View Blog</h1>
+    
+    <div id="blog-container" class="mt-8 bg-white p-6 shadow-lg rounded-lg">
+        <!-- Blog post content will be inserted here -->
+    </div>
+    <p id="status-message" class="mt-4 text-red-500"></p>
+</div>
+
+
+    <!-- Blog Loading Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const blogContainer = document.getElementById('blog-container');
+            const statusMessage = document.getElementById('status-message');
+            const customId = '{{ custom_id }}';
+            const apiUrl = `/api/view-blog/${customId}/`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error fetching blog data.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    blogContainer.innerHTML = `
+                        <div class="p-4 mb-4 bg-gray-100 rounded-md">
+                            <h2 class="text-xl font-semibold">${data.title}</h2>
+                            <p><strong>Unique ID:</strong> ${data.custom_id}</p>
+                            <p>${new Date(data.created_at).toLocaleString()}</p>
+                            <div>${data.content}</div>
+                        </div>
+                    `;
+
+                    statusMessage.style.color = 'green';
+                    statusMessage.textContent = 'Blog loaded successfully.';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusMessage.textContent = 'Failed to load blog. Please try again later.';
+                    statusMessage.style.color = 'red';
+                });
+        });
+    </script>
+
+</body>
+</html>

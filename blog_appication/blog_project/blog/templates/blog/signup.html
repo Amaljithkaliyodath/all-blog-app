@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Container -->
+    <div class="min-h-screen flex items-center justify-center px-4 sm:px-0">
+        <div class="w-full max-w-md bg-white p-8 shadow-lg rounded-lg">
+
+            <!-- Sign Up Form -->
+            <h2 class="text-2xl font-bold text-center mb-6">Sign Up</h2>
+            <form id="signupForm" method="POST">
+                {% csrf_token %}
+
+                <!-- Email -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="id_email">Email</label>
+                    {{ form.email }}
+                </div>
+
+                <!-- Username -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="id_username">Username</label>
+                    {{ form.username }}
+                </div>
+
+                <!-- Password -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="id_password1">Password</label>
+                    {{ form.password1 }}
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="id_password2">Confirm Password</label>
+                    {{ form.password2 }}
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none">
+                        Sign Up
+                    </button>
+                </div>
+            </form>
+
+            <!-- Login Message -->
+            <p class="text-center mt-6 text-sm text-gray-500">
+                Already have an account? <a href="{% url 'login' %}" class="text-blue-500 hover:underline">Login here</a>.
+            </p>
+
+        </div>
+    </div>
+
+    <!-- JavaScript for form validation -->
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(event) {
+            const password1 = document.getElementById('id_password1').value;
+            const password2 = document.getElementById('id_password2').value;
+            
+            if (password1 !== password2) {
+                event.preventDefault();
+                alert('Passwords do not match!');
+            }
+        });
+    </script>
+
+</body>
+</html>
